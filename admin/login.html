@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<title>Giriş — Düğün Davetli Yönetimi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F1EA;--panel:#FFFFFF;--ink:#2C2A26;--muted:#8A8479;--line:#E7E1D5;
+    --sage:#7E9074;--sage-deep:#63755A;--gold:#B39865;--danger:#C4695B;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;-webkit-font-smoothing:antialiased;}
+  .card{width:100%;max-width:400px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:40px 32px;box-shadow:0 24px 60px -40px rgba(70,60,40,.4);}
+  .brand{text-align:center;margin-bottom:8px;}
+  .brand h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:1.9rem;letter-spacing:.01em;}
+  .brand p{color:var(--muted);font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;margin-top:4px;}
+  .hr{height:1px;background:var(--line);margin:26px 0;}
+  label{display:block;font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+  input{width:100%;height:50px;border:1px solid var(--line);border-radius:12px;padding:0 14px;font-family:'Inter';font-size:.95rem;color:var(--ink);background:#FCFBF8;transition:.2s;margin-bottom:18px;}
+  input:focus{outline:none;border-color:var(--sage);box-shadow:0 0 0 3px rgba(126,144,116,.14);}
+  .btn{width:100%;height:52px;border:none;border-radius:12px;background:var(--sage);color:#fff;font-family:'Inter';font-weight:600;font-size:.92rem;letter-spacing:.04em;cursor:pointer;transition:.2s;}
+  .btn:hover{background:var(--sage-deep);}
+  .btn:disabled{opacity:.6;cursor:default;}
+  .msg{margin-top:16px;font-size:.85rem;text-align:center;min-height:1.1em;color:var(--danger);}
+  .hint{margin-top:20px;font-size:.72rem;color:var(--muted);text-align:center;line-height:1.6;}
+  .setup-warn{background:#FBF3E4;border:1px solid #EBD9B4;color:#8A6D2F;font-size:.78rem;border-radius:10px;padding:12px 14px;margin-bottom:20px;line-height:1.5;display:none;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <h1>Emircan &amp; Sümeyye</h1>
+      <p>Düğün Davetli Yönetimi</p>
+    </div>
+    <div class="hr"></div>
+    <div class="setup-warn" id="setupWarn">
+      Supabase bağlantısı henüz ayarlanmamış. Lütfen <b>config.js</b> dosyasındaki bilgileri doldurun.
+    </div>
+    <form id="loginForm">
+      <label for="email">E-posta</label>
+      <input type="email" id="email" placeholder="admin@ornek.com" autocomplete="username" required>
+      <label for="pass">Şifre</label>
+      <input type="password" id="pass" placeholder="••••••••" autocomplete="current-password" required>
+      <button class="btn" id="btn" type="submit">Giriş Yap</button>
+      <div class="msg" id="msg"></div>
+    </form>
+    <div class="hint">Bu alan yalnızca çift ve aileler içindir.</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
+  <script>
+    let sb=null;
+    const cfg=window.__WEDDING_CONFIG__||{};
+    const configured = cfg.SUPABASE_URL && cfg.SUPABASE_URL.indexOf('http')===0 && cfg.SUPABASE_ANON_KEY && cfg.SUPABASE_ANON_KEY.length>20;
+    if(configured){ sb=supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY); }
+    else{ document.getElementById('setupWarn').style.display='block'; }
+
+    // if already logged in, go to dashboard
+    (async()=>{ if(sb){ const {data}=await sb.auth.getSession(); if(data.session){ location.href='dashboard.html'; } } })();
+
+    const form=document.getElementById('loginForm');
+    const msg=document.getElementById('msg');
+    const btn=document.getElementById('btn');
+    form.addEventListener('submit',async e=>{
+      e.preventDefault();
+      msg.textContent='';
+      if(!sb){ msg.textContent='Supabase ayarlanmadan giriş yapılamaz.'; return; }
+      btn.disabled=true;btn.textContent='Giriş yapılıyor…';
+      const email=document.getElementById('email').value.trim();
+      const password=document.getElementById('pass').value;
+      const {error}=await sb.auth.signInWithPassword({email,password});
+      if(error){ btn.disabled=false;btn.textContent='Giriş Yap'; msg.textContent='E-posta veya şifre hatalı.'; return; }
+      location.href='dashboard.html';
+    });
+  </script>
+</body>
+</html>
