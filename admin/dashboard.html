@@ -7,7 +7,7 @@
 <title>Davetli Yönetimi — Emircan &amp; Sümeyye</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=Allura&family=Great+Vibes&family=Dancing+Script:wght@500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Cormorant:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Marcellus&family=Manrope:wght@300;400;500;600&family=Jost:wght@300;400;500&family=Josefin+Sans:wght@300;400;500&family=Tenor+Sans&family=Italiana&family=Pinyon+Script&family=Parisienne&family=Libre+Baskerville:wght@400;700&family=Montserrat:wght@300;400;500&family=Cinzel:wght@400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#F4F1EA;--panel:#FFFFFF;--ink:#2C2A26;--muted:#8A8479;--faint:#B7B0A2;--line:#E7E1D5;
@@ -103,10 +103,32 @@
 
   .setup-warn{background:#FBF3E4;border:1px solid #EBD9B4;color:#8A6D2F;font-size:.85rem;border-radius:12px;padding:16px 18px;margin-bottom:20px;line-height:1.6;}
 
+  /* ---------- Font picker ---------- */
+  .font-section{margin-top:40px;}
+  .font-intro{font-size:.85rem;color:var(--muted);margin:-6px 0 18px;line-height:1.6;}
+  .font-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  .font-card{position:relative;background:var(--panel);border:1.5px solid var(--line);border-radius:16px;padding:22px 22px 20px;cursor:pointer;transition:.2s;overflow:hidden;}
+  .font-card:hover{border-color:var(--sage);box-shadow:0 12px 30px -22px rgba(70,60,40,.5);}
+  .font-card.active{border-color:var(--sage-deep);box-shadow:0 0 0 3px rgba(126,144,116,.16);}
+  .font-card.active::after{content:"✓";position:absolute;top:14px;right:16px;width:24px;height:24px;background:var(--sage-deep);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;}
+  .fc-num{font-family:'Inter';font-size:.66rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--sage-deep);margin-bottom:2px;}
+  .fc-name{font-family:'Inter';font-size:.78rem;color:var(--muted);margin-bottom:16px;}
+  .fc-names{font-size:2.15rem;line-height:1.05;color:var(--ink);margin-bottom:4px;}
+  .fc-amp{opacity:.5;}
+  .fc-date{font-size:1.35rem;color:var(--ink);opacity:.9;line-height:1.2;}
+  .fc-body{margin-top:10px;font-size:.82rem;color:var(--muted);line-height:1.5;}
+  .font-actions{display:flex;gap:12px;align-items:center;margin-top:20px;flex-wrap:wrap;}
+  .font-save{height:46px;border:none;border-radius:11px;background:var(--sage);color:#fff;font-family:'Inter';font-weight:600;font-size:.88rem;padding:0 24px;cursor:pointer;transition:.2s;}
+  .font-save:hover{background:var(--sage-deep);}
+  .font-save:disabled{opacity:.55;cursor:default;}
+  .font-status{font-size:.82rem;color:var(--sage-deep);font-weight:500;}
+  .font-status.err{color:var(--red);}
+
   @media(max-width:820px){
     .cards{grid-template-columns:repeat(2,1fr);}
     .table-wrap{display:none;}
     .m-list{display:flex;}
+    .font-grid{grid-template-columns:1fr;}
   }
   @media(max-width:420px){
     .countdown .big{font-size:1.6rem;}
@@ -165,6 +187,17 @@
     </div>
     <div class="m-list" id="mlist"></div>
     <div id="emptyState"></div>
+
+    <!-- ============ FONT PACKS ============ -->
+    <div class="font-section">
+      <div class="section-title"><h2>Site Yazı Tipi Paketleri</h2></div>
+      <p class="font-intro">Aşağıdan bir yazı tipi paketi seçip <b>Kaydet</b> deyin. Seçtiğiniz paket düğün sitesine otomatik uygulanır. Her paket: <b>başlık/isim fontu + metin fontu</b> ikilisidir.</p>
+      <div class="font-grid" id="fontGrid"></div>
+      <div class="font-actions">
+        <button class="font-save" id="fontSave">Seçili Paketi Kaydet</button>
+        <span class="font-status" id="fontStatus"></span>
+      </div>
+    </div>
   </div>
 
   <!-- Edit modal -->
@@ -224,10 +257,11 @@
 
     // ---- auth guard ----
     (async()=>{
-      if(!sb){ document.getElementById('setupWarn').style.display='block'; return; }
+      if(!sb){ document.getElementById('setupWarn').style.display='block'; renderFontPacks(); return; }
       const {data}=await sb.auth.getSession();
       if(!data.session){ location.href='login.html'; return; }
       loadData();
+      initFontPacks();
     })();
 
     document.getElementById('logout').addEventListener('click',async()=>{
@@ -403,6 +437,79 @@
       const url=URL.createObjectURL(blob);
       const a=document.createElement('a');a.href=url;a.download='davetli-listesi.csv';a.click();URL.revokeObjectURL(url);
     });
+
+    // ============ FONT PACKS ============
+    // Her paket: id, isim, başlık fontu (heading/names), metin fontu (body), script mi?
+    const FONT_PACKS=[
+      {id:'cormorant-manrope', name:'Cormorant + Manrope', heading:"'Cormorant Garamond',serif", body:"'Manrope',sans-serif", mood:'Zarif · klasik'},
+      {id:'allura-cormorant',  name:'Allura + Cormorant',  heading:"'Allura',cursive",           body:"'Cormorant Garamond',serif", mood:'El yazısı · romantik', script:true},
+      {id:'greatvibes-jost',   name:'Great Vibes + Jost',  heading:"'Great Vibes',cursive",       body:"'Jost',sans-serif", mood:'Kaligrafi · ferah', script:true},
+      {id:'playfair-montserrat',name:'Playfair + Montserrat',heading:"'Playfair Display',serif",   body:"'Montserrat',sans-serif", mood:'Modern · şık'},
+      {id:'fraunces-manrope',  name:'Fraunces + Manrope',  heading:"'Fraunces',serif",            body:"'Manrope',sans-serif", mood:'Sıcak · editorial'},
+      {id:'marcellus-josefin', name:'Marcellus + Josefin', heading:"'Marcellus',serif",           body:"'Josefin Sans',sans-serif", mood:'İnce · zarif'},
+      {id:'ebgaramond-tenor',  name:'EB Garamond + Tenor', heading:"'EB Garamond',serif",         body:"'Tenor Sans',sans-serif", mood:'Zamansız · sakin'},
+      {id:'pinyon-lora',       name:'Pinyon + Lora',       heading:"'Pinyon Script',cursive",     body:"'Lora',serif", mood:'Kaligrafi · klasik', script:true},
+      {id:'cinzel-cormorant',  name:'Cinzel + Cormorant',  heading:"'Cinzel',serif",              body:"'Cormorant',serif", mood:'Görkemli · antik'},
+      {id:'parisienne-librebask',name:'Parisienne + Libre',heading:"'Parisienne',cursive",        body:"'Libre Baskerville',serif", mood:'El yazısı · geleneksel', script:true}
+    ];
+
+    let selectedPack=null;
+
+    function packCardHTML(p,i){
+      const nmeFont=p.heading;
+      const namesSize=p.script?'2.8rem':'2.15rem';
+      const dateSize=p.script?'1.35rem':'1.35rem';
+      return '<div class="font-card" data-id="'+p.id+'" tabindex="0">'
+        +'<div class="fc-num">Paket '+(i+1)+'</div>'
+        +'<div class="fc-name">'+p.name+' · '+p.mood+'</div>'
+        +'<div class="fc-names" style="font-family:'+nmeFont+';font-size:'+namesSize+'">Sümeyye <span class="fc-amp">&amp;</span> Emircan</div>'
+        +'<div class="fc-date" style="font-family:'+nmeFont+';font-size:'+dateSize+'">26 Eylül 2026</div>'
+        +'<div class="fc-body" style="font-family:'+p.body+'">Bu özel günümüzde sizleri de aramızda görmekten mutluluk duyarız.</div>'
+        +'</div>';
+    }
+
+    function renderFontPacks(){
+      const grid=document.getElementById('fontGrid');
+      if(!grid) return;
+      grid.innerHTML=FONT_PACKS.map(packCardHTML).join('');
+      grid.querySelectorAll('.font-card').forEach(card=>{
+        card.addEventListener('click',()=>selectPack(card.dataset.id));
+        card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectPack(card.dataset.id);}});
+      });
+    }
+
+    function selectPack(id){
+      selectedPack=id;
+      document.querySelectorAll('.font-card').forEach(c=>c.classList.toggle('active',c.dataset.id===id));
+    }
+
+    async function initFontPacks(){
+      renderFontPacks();
+      // mevcut kayıtlı paketi yükle ve işaretle
+      try{
+        const {data,error}=await sb.from('site_settings').select('value').eq('key','font_pack').maybeSingle();
+        if(!error && data && data.value){ selectPack(data.value); }
+      }catch(e){ /* tablo yoksa sessizce geç */ }
+
+      const saveBtn=document.getElementById('fontSave');
+      const status=document.getElementById('fontStatus');
+      saveBtn.addEventListener('click',async()=>{
+        status.classList.remove('err'); status.textContent='';
+        if(!selectedPack){ status.classList.add('err'); status.textContent='Lütfen bir paket seçiniz.'; return; }
+        if(!sb){ status.classList.add('err'); status.textContent='Supabase bağlı değil.'; return; }
+        saveBtn.disabled=true; saveBtn.textContent='Kaydediliyor…';
+        try{
+          const {error}=await sb.from('site_settings').upsert({key:'font_pack',value:selectedPack},{onConflict:'key'});
+          if(error) throw error;
+          status.textContent='Kaydedildi ✓ Site bu paketi kullanacak.';
+        }catch(err){
+          console.error(err);
+          status.classList.add('err');
+          status.textContent='Kaydedilemedi. (site_settings tablosu kurulu mu?)';
+        }
+        saveBtn.disabled=false; saveBtn.textContent='Seçili Paketi Kaydet';
+      });
+    }
   </script>
 </body>
 </html>
