@@ -40,6 +40,12 @@
   .romantic-quote,.romantic-sign .with,.venue-name,.place,.countdown-copy{
     font-family:'Cormorant Garamond',serif;
   }
+  /* aligned (lining) numerals so dates/times aren't uneven */
+  .day-date,.count-num,.day-time,.final-date,.deadline .val,.venue-name,.place,.footer{
+    font-variant-numeric:lining-nums;
+    font-feature-settings:"lnum" 1,"onum" 0;
+  }
+  .count-num{font-variant-numeric:lining-nums tabular-nums;}
   .display{font-family:'Cormorant Garamond',serif;}
   /* Script (Allura) — ONLY for the couple's names & short romantic lines */
   .script,.script-mid,.romantic-sign .names,.final-wait,.final-names{
