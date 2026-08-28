@@ -43,12 +43,10 @@
   .romantic-quote,.romantic-sign .with,.venue-name,.place,.countdown-copy{
     font-family:var(--font-heading);
   }
-  /* aligned (lining) numerals so dates/times aren't uneven */
+  /* rakamlar kendi fontlarıyla uyumlu; sadece hizalı yükseklik iste (zorlama yok) */
   .day-date,.count-num,.day-time,.final-date,.deadline .val,.venue-name,.place,.footer{
     font-variant-numeric:lining-nums;
-    font-feature-settings:"lnum" 1,"onum" 0;
   }
-  .count-num{font-variant-numeric:lining-nums tabular-nums;}
   .display{font-family:var(--font-heading);}
   /* Script (Allura) — ONLY for the couple's names & short romantic lines */
   .script,.script-mid,.romantic-sign .names,.final-wait,.final-names{
