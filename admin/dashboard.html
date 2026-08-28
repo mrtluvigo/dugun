@@ -441,30 +441,34 @@
     // ============ FONT PACKS ============
     // Her paket: id, isim, başlık fontu (heading/names), metin fontu (body), script mi?
     const FONT_PACKS=[
-      {id:'cormorant-manrope', name:'Cormorant + Manrope', heading:"'Cormorant Garamond',serif", body:"'Manrope',sans-serif", mood:'Zarif · klasik'},
-      {id:'allura-cormorant',  name:'Allura + Cormorant',  heading:"'Allura',cursive",           body:"'Cormorant Garamond',serif", mood:'El yazısı · romantik', script:true},
-      {id:'greatvibes-jost',   name:'Great Vibes + Jost',  heading:"'Great Vibes',cursive",       body:"'Jost',sans-serif", mood:'Kaligrafi · ferah', script:true},
-      {id:'playfair-montserrat',name:'Playfair + Montserrat',heading:"'Playfair Display',serif",   body:"'Montserrat',sans-serif", mood:'Modern · şık'},
-      {id:'fraunces-manrope',  name:'Fraunces + Manrope',  heading:"'Fraunces',serif",            body:"'Manrope',sans-serif", mood:'Sıcak · editorial'},
-      {id:'marcellus-josefin', name:'Marcellus + Josefin', heading:"'Marcellus',serif",           body:"'Josefin Sans',sans-serif", mood:'İnce · zarif'},
-      {id:'ebgaramond-tenor',  name:'EB Garamond + Tenor', heading:"'EB Garamond',serif",         body:"'Tenor Sans',sans-serif", mood:'Zamansız · sakin'},
-      {id:'pinyon-lora',       name:'Pinyon + Lora',       heading:"'Pinyon Script',cursive",     body:"'Lora',serif", mood:'Kaligrafi · klasik', script:true},
-      {id:'cinzel-cormorant',  name:'Cinzel + Cormorant',  heading:"'Cinzel',serif",              body:"'Cormorant',serif", mood:'Görkemli · antik'},
-      {id:'parisienne-librebask',name:'Parisienne + Libre',heading:"'Parisienne',cursive",        body:"'Libre Baskerville',serif", mood:'El yazısı · geleneksel', script:true}
+      {id:'cormorant-manrope', name:'Cormorant + Manrope', heading:"'Cormorant Garamond',serif", script:"'Cormorant Garamond',serif", body:"'Manrope',sans-serif", mood:'Zarif · klasik'},
+      {id:'allura-cormorant',  name:'Allura + Cormorant',  heading:"'Cormorant Garamond',serif", script:"'Allura',cursive",            body:"'Cormorant Garamond',serif", mood:'El yazısı · romantik'},
+      {id:'greatvibes-jost',   name:'Great Vibes + Jost',  heading:"'Jost',sans-serif",           script:"'Great Vibes',cursive",       body:"'Jost',sans-serif", mood:'Kaligrafi · ferah'},
+      {id:'playfair-montserrat',name:'Playfair + Montserrat',heading:"'Playfair Display',serif",  script:"'Playfair Display',serif",    body:"'Montserrat',sans-serif", mood:'Modern · şık'},
+      {id:'fraunces-manrope',  name:'Fraunces + Manrope',  heading:"'Fraunces',serif",            script:"'Fraunces',serif",            body:"'Manrope',sans-serif", mood:'Sıcak · editorial'},
+      {id:'marcellus-josefin', name:'Marcellus + Josefin', heading:"'Marcellus',serif",           script:"'Marcellus',serif",           body:"'Josefin Sans',sans-serif", mood:'İnce · zarif'},
+      {id:'ebgaramond-tenor',  name:'EB Garamond + Tenor', heading:"'EB Garamond',serif",         script:"'EB Garamond',serif",         body:"'Tenor Sans',sans-serif", mood:'Zamansız · sakin'},
+      {id:'pinyon-lora',       name:'Pinyon + Lora',       heading:"'Lora',serif",                script:"'Pinyon Script',cursive",     body:"'Lora',serif", mood:'Kaligrafi · klasik'},
+      {id:'cinzel-cormorant',  name:'Cinzel + Cormorant',  heading:"'Cinzel',serif",              script:"'Cinzel',serif",              body:"'Cormorant',serif", mood:'Görkemli · antik'},
+      {id:'parisienne-librebask',name:'Parisienne + Libre',heading:"'Libre Baskerville',serif",   script:"'Parisienne',cursive",        body:"'Libre Baskerville',serif", mood:'El yazısı · geleneksel'}
     ];
+
+    // Bir paketin isim fontu (script) gövde/başlık fontundan farklıysa "el yazısı" paketidir
+    function isScriptPack(p){ return p.script!==p.heading; }
 
     let selectedPack=null;
 
     function packCardHTML(p,i){
-      const nmeFont=p.heading;
-      const namesSize=p.script?'2.8rem':'2.15rem';
-      const dateSize=p.script?'1.35rem':'1.35rem';
+      const scriptFont=p.script;      // isimler
+      const headingFont=p.heading;    // tarih/başlık
+      const bodyFont=p.body;          // cümle
+      const namesSize=isScriptPack(p)?'3rem':'2.15rem';
       return '<div class="font-card" data-id="'+p.id+'" tabindex="0">'
         +'<div class="fc-num">Paket '+(i+1)+'</div>'
         +'<div class="fc-name">'+p.name+' · '+p.mood+'</div>'
-        +'<div class="fc-names" style="font-family:'+nmeFont+';font-size:'+namesSize+'">Sümeyye <span class="fc-amp">&amp;</span> Emircan</div>'
-        +'<div class="fc-date" style="font-family:'+nmeFont+';font-size:'+dateSize+'">26 Eylül 2026</div>'
-        +'<div class="fc-body" style="font-family:'+p.body+'">Bu özel günümüzde sizleri de aramızda görmekten mutluluk duyarız.</div>'
+        +'<div class="fc-names" style="font-family:'+scriptFont+';font-size:'+namesSize+'">Sümeyye <span class="fc-amp">&amp;</span> Emircan</div>'
+        +'<div class="fc-date" style="font-family:'+headingFont+';font-size:1.35rem">26 Eylül 2026</div>'
+        +'<div class="fc-body" style="font-family:'+bodyFont+'">Bu özel günümüzde sizleri de aramızda görmekten mutluluk duyarız.</div>'
         +'</div>';
     }
 
